@@ -781,4 +781,19 @@ public class FacturaDBDataImpl implements FacturaData{
         entidad.setId(statement.getInt("PID"));
         statement.close();
     }
+
+    @Override
+    public void reajustarFolio(int idEmpresa, String serie, int folio
+        , int idFactura) throws Exception {
+        CallableStatement statement = connection.prepareCall(
+            "{CALL USP_FACTURAS_U_REAJUSTE_FOLIO(?,?,?,?)}"
+        );
+        statement.setInt("PIDEMPRESA", idEmpresa);
+        statement.setString("PSERIE", serie);
+        statement.setInt("PFOLIO", folio);
+        statement.setInt("PID", idFactura);
+        statement.executeUpdate();
+        
+        statement.close();
+    }
 }

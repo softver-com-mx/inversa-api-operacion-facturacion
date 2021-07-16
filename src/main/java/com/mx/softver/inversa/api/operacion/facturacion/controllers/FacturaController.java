@@ -211,7 +211,7 @@ public class FacturaController {
     @POST
     @Path("timbrar")
     public Response timbrarFactura(Id entidad) {
-        RespuestaBase<String> respuesta = new RespuestaBase<>();
+        RespuestaBase<FacturaConcepto> respuesta = new RespuestaBase<>();
         Response.Status estadoRespuesta = Response.Status.OK;
         try {
             Connection connection = 
