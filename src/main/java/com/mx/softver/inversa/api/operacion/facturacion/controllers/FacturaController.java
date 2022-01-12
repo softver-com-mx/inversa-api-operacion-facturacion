@@ -241,8 +241,7 @@ public class FacturaController {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }
         return Response.status(estadoRespuesta).entity(respuesta).build();
-    }
-    
+    } 
     /**
      * metodo de la api para cancelar una factura
      * @param entidad
@@ -495,6 +494,32 @@ public class FacturaController {
             respuesta.setError(true);
             respuesta.setMensaje(ex.getMessage());
             
+        } catch (Exception ex) {
+            estadoRespuesta = Response.Status.INTERNAL_SERVER_ERROR;
+            respuesta.setError(true);
+            respuesta.setMensaje("Error en el procesamiento de la peticion");
+            respuesta.setMensajeDetalle(ex.getMessage());
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+        return Response.status(estadoRespuesta).entity(respuesta).build();
+    }
+
+    @POST
+    @Path("reporte/descargar")
+    public Response descargarReporte(FacturaFiltro filtro) throws Exception {
+        RespuestaBase<Archivo> respuesta = new RespuestaBase<>();
+        Response.Status estadoRespuesta = Response.Status.OK;
+        try {
+            Connection connection = (Connection) requestContext.getProperty("CONNECTION");
+            facturaService = new FacturaServiceImpl(new FacturaDBDataImpl(connection));
+            respuesta.setEntidad(
+                    facturaService.descargarReporte(
+                            (InfoAuditoria) requestContext.getProperty("INFOAUDITORIA"), filtro)
+            );
+        } catch (OperationNotPermittedSoftverException ex) {
+            estadoRespuesta = Response.Status.BAD_REQUEST;
+            respuesta.setError(true);
+            respuesta.setMensaje(ex.getMessage());
         } catch (Exception ex) {
             estadoRespuesta = Response.Status.INTERNAL_SERVER_ERROR;
             respuesta.setError(true);

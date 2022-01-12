@@ -15,6 +15,7 @@ import com.mx.softver.inversa.operacion.facturacion.factura.entity.FacturaRelaci
 import com.mx.softver.inversa.operacion.facturacion.factura.entity.FacturaVistaPrevia;
 import com.mx.softver.inversa.operacion.facturacion.factura.entity.Impuesto;
 import com.mx.softver.inversa.operacion.facturacion.factura.entity.LogoCompania;
+import com.mx.softver.inversa.operacion.facturacion.factura.entity.ReporteFactura;
 import com.mx.softver.inversa.operacion.facturacion.factura.entity.UuidConceptos;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -795,5 +796,72 @@ public class FacturaDBDataImpl implements FacturaData{
         statement.executeUpdate();
         
         statement.close();
+    }
+
+       @Override
+    public List<ReporteFactura> obtenerDatosReporteDescargar(int idEmpresa, FacturaFiltro filtro) throws Exception {
+        List<ReporteFactura> listaFacturas = new ArrayList<>();
+        CallableStatement statement = connection.prepareCall(
+                "{CALL USP_FACTURAS_DESCARGAR_REPORTE_R(?,?,?,?,?)}"  
+        );
+        asignarParametrosReporte(statement, filtro, idEmpresa);
+        ResultSet resultSet = statement.executeQuery();
+
+        while (resultSet.next()) {
+            String fechaString = resultSet.getString("FHEXPEDICION");
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date fechaFactura = formatter.parse(fechaString);
+
+            ReporteFactura factura = new ReporteFactura();
+            factura.setFechaExpedicion(fechaFactura);
+            factura.setFolio(resultSet.getInt("FOLIO"));
+            factura.setSerie(resultSet.getString("SERIE"));
+            factura.setRfcReceptor(resultSet.getString("RFC"));
+            factura.setNombreReceptor(resultSet.getString("RAZONSOCIAL"));
+            factura.setNombreEntidadFederativa(resultSet.getString("ENTIDAD FEDERATIVA"));
+            factura.setConcepto(resultSet.getString("CONCEPTO"));
+            factura.setObservacion(resultSet.getString("OBSERVACION"));
+            factura.setFormaPago(resultSet.getString("FORMA DE PAGO"));
+            factura.setClaveMetodoPago(resultSet.getString("METODOPAGO"));
+            factura.setSubtotal(resultSet.getDouble("SUBTOTAL"));
+            factura.setTotal(resultSet.getDouble("TOTAL"));
+            factura.setEstatus(resultSet.getString("ESTADO"));
+            listaFacturas.add(factura);
+        }
+        resultSet.close();
+        statement.close();
+
+        return listaFacturas;
+    }
+     private void asignarParametrosReporte(CallableStatement statement, FacturaFiltro filtro, int idEmpresa)
+            throws Exception {
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String fecha;
+
+        statement.setInt("PIDEMPRESA", idEmpresa);
+        
+        if (filtro.getEstatus() == null) {
+            statement.setNull("PESTATUS", Types.NULL);
+        } else {
+            statement.setString("PESTATUS", filtro.getEstatus());
+        }
+        if (filtro.getIdCliente() == 0) {
+            statement.setNull("PIDCLIENTE", Types.NULL);
+        } else {
+            statement.setInt("PIDCLIENTE", filtro.getIdCliente());
+        }
+        if (filtro.getFechaDesde() == null) {
+            statement.setNull("PFHINICIO", Types.NULL);
+        } else {
+            fecha = dateFormat.format(filtro.getFechaDesde());
+            statement.setString("PFHINICIO", fecha);
+        }
+        if (filtro.getFechaHasta() == null) {
+            statement.setNull("PFHFIN", Types.NULL);
+        } else {
+            fecha = dateFormat.format(filtro.getFechaHasta());
+            statement.setString("PFHFIN", fecha);
+        }
     }
 }
