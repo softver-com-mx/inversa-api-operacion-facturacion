@@ -98,7 +98,7 @@ public class FacturaDBDataImpl implements FacturaData{
         List<Factura> lista = new ArrayList<>();
         String fecha;
         CallableStatement statement = connection.prepareCall(
-            "{CALL USP_FACTURAS_R(?,?,?,?,?)}"
+            "{CALL USP_FACTURAS_R_INVERSA(?,?,?,?,?)}"
         );
         statement.setInt("PIDEMPRESA", idEmpresa);
         if (filtro.getEstatus().equals("0")) {
@@ -153,6 +153,7 @@ public class FacturaDBDataImpl implements FacturaData{
             factura.setClaveTipoRelacion(resultSet.getString("CLAVETIPORELACION"));
             factura.setNombreCliente(resultSet.getString("RAZONSOCIAL"));
             factura.setEstatus(resultSet.getString("ESTATUS"));
+            factura.setFolioTicket(resultSet.getString("FOLIOTICKET"));
             lista.add(factura);
         }
         resultSet.close();
