@@ -6,6 +6,7 @@
 package com.mx.softver.inversa.api.operacion.facturacion.data;
 
 import com.mx.softver.inversa.operacion.facturacion.factura.datainterface.FacturaData;
+import com.mx.softver.inversa.operacion.facturacion.factura.entity.Cfdi;
 import com.mx.softver.inversa.operacion.facturacion.factura.entity.Concepto;
 import com.mx.softver.inversa.operacion.facturacion.factura.entity.ConceptoCompleto;
 import com.mx.softver.inversa.operacion.facturacion.factura.entity.Factura;
@@ -834,7 +835,8 @@ public class FacturaDBDataImpl implements FacturaData{
 
         return listaFacturas;
     }
-     private void asignarParametrosReporte(CallableStatement statement, FacturaFiltro filtro, int idEmpresa)
+    
+    private void asignarParametrosReporte(CallableStatement statement, FacturaFiltro filtro, int idEmpresa)
             throws Exception {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -864,5 +866,89 @@ public class FacturaDBDataImpl implements FacturaData{
             fecha = dateFormat.format(filtro.getFechaHasta());
             statement.setString("PFHFIN", fecha);
         }
+    }
+     
+    @Override
+    public void cancelar(int idUsuarioAuditoria, Cfdi comprobante) throws Exception {
+        CallableStatement statement = connection.prepareCall(
+                "{CALL USP_FACTURAS_U_CANCELAR(?,?,?,?)}"
+        );
+        statement.setString("PUUID", comprobante.getUuid());
+        statement.setString("PMOTIVO", comprobante.getMotivoCancelacion());
+        if (comprobante.getFolioSustitucion() == null) {
+            statement.setNull("PFOLIOSUSTITUCION", Types.NULL);
+        } else {
+            statement.setString("PFOLIOSUSTITUCION", comprobante.getFolioSustitucion());
+        }
+        statement.setInt("PIDUSUARIOAUDITORIA", idUsuarioAuditoria);
+        statement.executeUpdate();
+
+        statement.close();
+    }
+
+    @Override
+    public void cancelacionEnProceso(int idUsuarioAuditoria, Cfdi comprobante) throws Exception {
+        CallableStatement statement = connection.prepareCall(
+                "{CALL USP_FACTURAS_U_CANCELACION_EN_PROCESO(?,?,?,?)}"
+        );
+        statement.setString("PUUID", comprobante.getUuid());
+        statement.setString("PMOTIVO", comprobante.getMotivoCancelacion());
+        if (comprobante.getFolioSustitucion() == null) {
+            statement.setNull("PFOLIOSUSTITUCION", Types.NULL);
+        } else {
+            statement.setString("PFOLIOSUSTITUCION", comprobante.getFolioSustitucion());
+        }
+        statement.setInt("PIDUSUARIOAUDITORIA", idUsuarioAuditoria);
+        statement.executeUpdate();
+
+        statement.close();
+    }
+
+    @Override
+    public void anularCancelacion(int idUsuarioAuditoria, Cfdi comprobante) throws Exception {
+        CallableStatement statement = connection.prepareCall(
+                "{CALL USP_FACTURAS_U_ANULAR_CANCELACION(?,?)}"
+        );
+        statement.setString("PUUID", comprobante.getUuid());
+        statement.setInt("PIDUSUARIOAUDITORIA", idUsuarioAuditoria);
+        statement.executeUpdate();
+
+        statement.close();
+    }
+
+    @Override
+    public Cfdi obtenerComprobanteACancelar(String uuid) throws Exception {
+        Cfdi cfdi = new Cfdi();
+        try (CallableStatement statement = connection.prepareCall(
+                "{CALL USP_FACTURAS_R_COMPROBANTE_A_CANCELAR(?)}"
+        )) {
+            statement.setString("PUUID", uuid);
+            ResultSet resultSet = statement.executeQuery();
+            
+            while(resultSet.next()) {
+                cfdi.setUuid(resultSet.getString("IDUU"));
+                cfdi.setMotivoCancelacion(resultSet.getString("MOTIVOCANCELACION"));
+                cfdi.setFolioSustitucion(resultSet.getString("FOLIOSUSTITUCION"));
+                break;
+            }
+            resultSet.close();
+        }
+        
+        return cfdi;
+    }
+    
+    @Override
+    public boolean verificarRelacionCfdi(String uuid) throws Exception {
+        CallableStatement statement = connection.prepareCall(
+            "{CALL USP_FACTURAS_R_VERIFICAR_RELACION(?,?)}"
+        );
+        statement.setString("PUUID", uuid);
+        statement.registerOutParameter("PVALIDO", Types.BOOLEAN);
+        statement.execute();
+        
+        boolean valido = statement.getBoolean("PVALIDO");
+        statement.close();
+        
+        return valido;
     }
 }
