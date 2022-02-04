@@ -926,7 +926,7 @@ public class FacturaDBDataImpl implements FacturaData{
             ResultSet resultSet = statement.executeQuery();
             
             while(resultSet.next()) {
-                cfdi.setUuid(resultSet.getString("IDUU"));
+                cfdi.setUuid(resultSet.getString("UUID"));
                 cfdi.setMotivoCancelacion(resultSet.getString("MOTIVOCANCELACION"));
                 cfdi.setFolioSustitucion(resultSet.getString("FOLIOSUSTITUCION"));
                 break;
