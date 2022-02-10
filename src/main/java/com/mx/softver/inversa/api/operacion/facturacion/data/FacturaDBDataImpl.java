@@ -818,6 +818,7 @@ public class FacturaDBDataImpl implements FacturaData{
             factura.setFechaExpedicion(fechaFactura);
             factura.setFolio(resultSet.getInt("FOLIO"));
             factura.setSerie(resultSet.getString("SERIE"));
+            factura.setCantidad(resultSet.getInt("CANTIDAD"));
             factura.setRfcReceptor(resultSet.getString("RFC"));
             factura.setNombreReceptor(resultSet.getString("RAZONSOCIAL"));
             factura.setNombreEntidadFederativa(resultSet.getString("ENTIDAD FEDERATIVA"));
