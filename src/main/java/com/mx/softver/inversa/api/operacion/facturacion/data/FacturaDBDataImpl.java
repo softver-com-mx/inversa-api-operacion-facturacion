@@ -810,12 +810,9 @@ public class FacturaDBDataImpl implements FacturaData{
         ResultSet resultSet = statement.executeQuery();
 
         while (resultSet.next()) {
-            String fechaString = resultSet.getString("FHEXPEDICION");
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date fechaFactura = formatter.parse(fechaString);
-
             ReporteFactura factura = new ReporteFactura();
-            factura.setFechaExpedicion(fechaFactura);
+            factura.setFechaExpedicion(formatter.parse(resultSet.getString("FHEXPEDICION")));
             factura.setFolio(resultSet.getInt("FOLIO"));
             factura.setSerie(resultSet.getString("SERIE"));
             factura.setCantidad(resultSet.getInt("CANTIDAD"));
