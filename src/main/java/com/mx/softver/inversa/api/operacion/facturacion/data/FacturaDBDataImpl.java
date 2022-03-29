@@ -827,6 +827,7 @@ public class FacturaDBDataImpl implements FacturaData{
             factura.setTotal(resultSet.getDouble("TOTAL"));
             factura.setDescuento(resultSet.getDouble("DESCUENTO"));
             factura.setEstatus(resultSet.getString("ESTADO"));
+            factura.setUuid(resultSet.getString("UUID"));
             listaFacturas.add(factura);
         }
         resultSet.close();
